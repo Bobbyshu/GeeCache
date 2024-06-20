@@ -41,9 +41,15 @@ func New(maxBytes int64, onEvicted func(string, Value)) *Cache {
 // get element by key and move it to front
 func (c *Cache) Get(key string) (value Value, ok bool) {
 	if ele, ok := c.cache[key]; ok {
+		// update ele
 		c.ll.MoveToFront(ele)
+		// predicate in Go x.(T)
+		// cache map[string]*list.Element
+		// string -> pointer
 		kv := ele.Value.(*entry)
 		return kv.value, true
 	}
-	return
+
+	// can't find
+	return nil, false
 }
