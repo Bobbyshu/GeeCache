@@ -53,3 +53,21 @@ func (c *Cache) Get(key string) (value Value, ok bool) {
 	// can't find
 	return nil, false
 }
+
+// remove least recently used element
+func (c *Cache) RemoveOldest() {
+	ele := c.ll.Back()
+	if ele != nil {
+		c.ll.Remove(ele)
+		kv := ele.Value.(*entry)
+		// delete the key store in map
+		delete(c.cache, kv.key)
+
+		// update used bytes in cache
+		c.nbytes -= int64(len(kv.key)) + int64(kv.value.Len())
+		// update corresponding kv
+		if c.OnEvicted != nil {
+			c.OnEvicted(kv.key, kv.value)
+		}
+	}
+}
