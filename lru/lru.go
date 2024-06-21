@@ -92,3 +92,8 @@ func (c *Cache) Add(key string, value Value) {
 		c.RemoveOldest()
 	}
 }
+
+// check the amount of entries
+func (c *Cache) Len() int {
+	return c.ll.Len()
+}
