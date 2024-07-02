@@ -18,7 +18,7 @@ type cache struct {
 func (c *cache) add(key string, value ByteView) {
 	c.mu.Lock()
 	// release lock after method
-	defer c.mu.Lock()
+	defer c.mu.Unlock()
 	// lazy Initialization
 	// init it until use it
 	if c.lru == nil {
@@ -30,7 +30,7 @@ func (c *cache) add(key string, value ByteView) {
 
 func (c *cache) get(key string) (value ByteView, ok bool) {
 	c.mu.Lock()
-	defer c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if c.lru == nil {
 		return
