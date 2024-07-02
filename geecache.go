@@ -49,9 +49,9 @@ func NewGroup(name string, cacheBytes int64, getter Getter) *Group {
 	defer mu.Unlock()
 
 	g := &Group{
-		name: name,
-		getter: getter,
-		mainCache: cache{cacheBytes: cacheBytes}
+		name:      name,
+		getter:    getter,
+		mainCache: cache{cacheBytes: cacheBytes},
 	}
 
 	groups[name] = g
@@ -72,12 +72,12 @@ func GetGroup(name string) *Group {
 // It first checks the mainCache, and if the key is not found
 // it calls the load method to fetch the data.
 func (g *Group) Get(key string) (ByteView, error) {
-	if key == " "{
+	if key == " " {
 		return ByteView{}, fmt.Errorf("key is required")
 	}
 
 	if v, ok := g.mainCache.get(key); ok {
-		log.Println("[Geecache] hit")
+		log.Println("[GeeCache] hit")
 		return v, nil
 	}
 
