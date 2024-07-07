@@ -72,7 +72,7 @@ func GetGroup(name string) *Group {
 // It first checks the mainCache, and if the key is not found
 // it calls the load method to fetch the data.
 func (g *Group) Get(key string) (ByteView, error) {
-	if key == " " {
+	if key == "" {
 		return ByteView{}, fmt.Errorf("key is required")
 	}
 
