@@ -14,7 +14,7 @@ var db = map[string]string{
 }
 
 func main() {
-	geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(
+	scoreGroup := geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(
 		func(key string) ([]byte, error) {
 			log.Println("[SlowDB] search key", key)
 			if v, ok := db[key]; ok {
@@ -23,6 +23,9 @@ func main() {
 			return nil, fmt.Errorf("%s not exist", key)
 		}))
 
+	log.Printf("Group 'scores' created: %v", scoreGroup != nil)
+	retrievedGroup := geecache.GetGroup("scores")
+	log.Printf("Retrieved 'scores' group immediately after creation: %v", retrievedGroup != nil)
 	addr := "localhost:9999"
 	peers := geecache.NewHTTPPool(addr)
 	log.Println("geecache is running at", addr)

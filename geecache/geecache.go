@@ -65,6 +65,7 @@ func GetGroup(name string) *Group {
 	mu.RLock()
 	g := groups[name]
 	mu.RUnlock()
+	log.Printf("GetGroup called for '%s', groups: %v, result: %v", name, groups, g != nil)
 	return g
 }
 

@@ -51,7 +51,7 @@ func (c *Cache) Get(key string) (value Value, ok bool) {
 	}
 
 	// can't find
-	return nil, false
+	return
 }
 
 // remove least recently used element
