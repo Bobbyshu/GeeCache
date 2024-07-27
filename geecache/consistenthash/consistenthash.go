@@ -2,6 +2,8 @@ package consistenthash
 
 import (
 	"hash/crc32"
+	"sort"
+	"strconv"
 )
 
 // Hash maps bytes to uint32
@@ -26,4 +28,16 @@ func New(replicas int, fn Hash) *Map {
 		m.hash = crc32.ChecksumIEEE
 	}
 	return m
+}
+
+// Add adds some keys to the hash.
+func (m *Map) Add(keys ...string) {
+	for _, key := range keys {
+		for i := 0; i < m.replicas; i++ {
+			hash := int(m.hash([]byte(strconv.Itoa(i) + key)))
+			m.keys = append(m.keys, hash)
+			m.hashMap[hash] = key
+		}
+	}
+	sort.Ints(m.keys)
 }
