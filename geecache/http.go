@@ -2,20 +2,28 @@ package geecache
 
 import (
 	"fmt"
+	"geecache/consistenthash"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 )
 
-const defaultBasePath = "/_geecache"
+const (
+	defaultBasePath = "/_geecache/"
+	defaultReplicas = 50
+)
 
-// Implements PeerPicker for a pool of HTTP peers.
+// HTTPPool implements PeerPicker for a pool of HTTP peers.
 type HTTPPool struct {
-	// register self address localhost(ip):port
-	self     string
-	basePath string
+	// this peer's base URL, e.g. "https://example.net:8000"
+	self        string
+	basePath    string
+	mu          sync.Mutex // guards peers and httpGetters
+	peers       *consistenthash.Map
+	httpGetters map[string]*httpGetter // keyed by e.g. "http://10.0.0.2:8008"
 }
 
 // Initializes an HTTP pool of peers.
