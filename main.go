@@ -24,6 +24,24 @@ func createGroup() *geecache.Group {
 		}))
 }
 
+func startAPIServer(apiAddr string, gee *geecache.Group) {
+	http.Handle("/api", http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			key := r.URL.Query().Get("key")
+			view, err := gee.Get(key)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/octet-stream")
+			w.Write(view.ByteSlice())
+
+		}))
+	log.Println("fontend server is running at", apiAddr)
+	log.Fatal(http.ListenAndServe(apiAddr[7:], nil))
+
+}
+
 func startCacheServer(addr string, addrs []string, gee *geecache.Group) {
 	peers := geecache.NewHTTPPool(addr)
 	peers.Set(addrs...)
