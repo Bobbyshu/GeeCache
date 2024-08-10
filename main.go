@@ -24,6 +24,14 @@ func createGroup() *geecache.Group {
 		}))
 }
 
+func startCacheServer(addr string, addrs []string, gee *geecache.Group) {
+	peers := geecache.NewHTTPPool(addr)
+	peers.Set(addrs...)
+	gee.RegisterPeers(peers)
+	log.Println("geecache is running at", addr)
+	log.Fatal(http.ListenAndServe(addr[7:], peers))
+}
+
 func main() {
 	scoreGroup := geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(
 		func(key string) ([]byte, error) {
