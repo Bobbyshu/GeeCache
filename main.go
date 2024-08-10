@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"geecache"
 	"log"
@@ -51,20 +52,27 @@ func startCacheServer(addr string, addrs []string, gee *geecache.Group) {
 }
 
 func main() {
-	scoreGroup := geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(
-		func(key string) ([]byte, error) {
-			log.Println("[SlowDB] search key", key)
-			if v, ok := db[key]; ok {
-				return []byte(v), nil
-			}
-			return nil, fmt.Errorf("%s not exist", key)
-		}))
+	var port int
+	var api bool
+	flag.IntVar(&port, "port", 8001, "Geecache server port")
+	flag.BoolVar(&api, "api", false, "Start a api server?")
+	flag.Parse()
 
-	log.Printf("Group 'scores' created: %v", scoreGroup != nil)
-	retrievedGroup := geecache.GetGroup("scores")
-	log.Printf("Retrieved 'scores' group immediately after creation: %v", retrievedGroup != nil)
-	addr := "localhost:9999"
-	peers := geecache.NewHTTPPool(addr)
-	log.Println("geecache is running at", addr)
-	log.Fatal(http.ListenAndServe(addr, peers))
+	apiAddr := "http://localhost:9999"
+	addrMap := map[int]string{
+		8001: "http://localhost:8001",
+		8002: "http://localhost:8002",
+		8003: "http://localhost:8003",
+	}
+
+	var addrs []string
+	for _, v := range addrMap {
+		addrs = append(addrs, v)
+	}
+
+	gee := createGroup()
+	if api {
+		go startAPIServer(apiAddr, gee)
+	}
+	startCacheServer(addrMap[port], []string(addrs), gee)
 }
