@@ -13,6 +13,17 @@ var db = map[string]string{
 	"Sam":  "567",
 }
 
+func createGroup() *geecache.Group {
+	return geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(
+		func(key string) ([]byte, error) {
+			log.Println("[SlowDB] search key", key)
+			if v, ok := db[key]; ok {
+				return []byte(v), nil
+			}
+			return nil, fmt.Errorf("%s not exist", key)
+		}))
+}
+
 func main() {
 	scoreGroup := geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(
 		func(key string) ([]byte, error) {
