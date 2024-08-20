@@ -14,26 +14,18 @@ type Group struct {
 }
 
 func (g *Group) Do(key string, fn func() (interface{}, error)) (interface{}, error) {
-	g.mu.Lock()
-	if g.m == nil {
-		g.m = make(map[string]*call)
-	}
 	if c, ok := g.m[key]; ok {
-		g.mu.Unlock()
-		c.wg.Wait()
-		return c.val, c.err
+		c.wg.Wait()         // wait if request processing
+		return c.val, c.err // return after request
 	}
 	c := new(call)
-	c.wg.Add(1)
-	g.m[key] = c
-	g.mu.Unlock()
+	c.wg.Add(1)  // add lock before request
+	g.m[key] = c // add to g.m，which means key has request process
 
-	c.val, c.err = fn()
-	c.wg.Done()
+	c.val, c.err = fn() // init request
+	c.wg.Done()         // finish request
 
-	g.mu.Lock()
-	delete(g.m, key)
-	g.mu.Unlock()
+	delete(g.m, key) // update
 
 	return c.val, c.err
 }
